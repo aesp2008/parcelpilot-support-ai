@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+.venv/
+venv/
+
+# Node / frontend
+node_modules/
+frontend/dist/
+npm-debug.log*
+
+# Env / secrets
+.env
+.env.local
+backend/.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Local scratch
+*.log
+drive-download-*.zip
+resp.json
