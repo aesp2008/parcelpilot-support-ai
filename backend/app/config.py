@@ -21,8 +21,8 @@ BUSINESS_DAY_START_HOUR = 9
 BUSINESS_DAY_END_HOUR = 18
 BUSINESS_DAYS = {0, 1, 2, 3, 4}  # Monday=0 ... Sunday=6
 
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-5")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
 
 CURRENCY = "INR"
 MANAGER_APPROVAL_THRESHOLD_INR = 1000
