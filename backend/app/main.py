@@ -10,6 +10,7 @@ from app.documents import DocumentIndex
 from app.session import create_customer_session, create_internal_session, get_session
 from app.agent import run_turn
 from app.tools import actions
+from app.insights import build_insights
 
 app = FastAPI(title="ParcelPilot Support AI")
 
@@ -97,6 +98,14 @@ def confirm_action(req: ConfirmRequest):
     if session is None:
         raise HTTPException(401, "Invalid or expired session")
     return actions.execute_action(session, req.pending_id)
+
+
+@app.get("/api/insights")
+def insights(session_id: str):
+    session = get_session(session_id)
+    if session is None or session.kind != "internal":
+        raise HTTPException(403, "Insights are only available to internal ParcelPilot sessions")
+    return build_insights(_db_conn)
 
 
 # Serve the built React frontend if present (production deploy). In local dev the
