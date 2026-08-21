@@ -74,7 +74,10 @@ the API and the UI. This is what's deployed at the hosted URL (see below).
 
 ## Hosted app
 
-[URL to be added once deployed]
+https://parcelpilot-support-ai.onrender.com
+
+Free-tier hosting: the service spins down after 15 minutes idle, so the first request
+after a period of inactivity can take 30-50 seconds to wake up.
 
 ## Trying it out
 
