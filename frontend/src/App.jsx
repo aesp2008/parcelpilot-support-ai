@@ -21,11 +21,13 @@ export default function App() {
               Insights
             </button>
           )}
-          <button className="nav" onClick={() => setSession(null)}>Switch user</button>
+          <button className="nav" onClick={() => { setSession(null); setView('chat') }}>Switch user</button>
         </nav>
       </header>
       <main>
-        {view === 'chat' ? <Chat session={session} /> : <Insights session={session} />}
+        {view === 'insights' && session.kind === 'internal'
+          ? <Insights session={session} />
+          : <Chat session={session} />}
       </main>
     </div>
   )
