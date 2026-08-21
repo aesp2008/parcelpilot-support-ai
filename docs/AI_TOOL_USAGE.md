@@ -27,6 +27,25 @@ How I used it, concretely:
   a very tight free-tier quota on the newest preview model. Had it identify an
   available lighter model with a higher free quota and re-verify the tool-calling flow
   against it before continuing.
+- **Catching a hallucination by actually testing the app, not reading the code.** While
+  trying the app myself, the agent answered a cancellation-fee question correctly but
+  added an invented supporting detail ("cancellations within 2 hours of the pickup window
+  or after dispatch incur a fee") that isn't in the SOP at all -- it had conflated the
+  SOP's unrelated service-credit delay threshold (2 hours past the pickup window) with the
+  cancellation-fee grace period (30 minutes), and invented "dispatch," a term that appears
+  nowhere in the pack. I had Claude Code trace the exact tool result the model received
+  (which contained no such numbers) to confirm the number wasn't grounded in any tool
+  output, then had it add an explicit grounding rule to the system prompt -- never state a
+  specific number/threshold unless it's present in a tool result from that turn -- and
+  re-ran both this case and the security-escalation case live to confirm the fix didn't
+  regress the other behavior.
+- **Fixing a production-only bug from real deploy logs.** The hosted app returned a bare
+  500 on any question requiring tool calls, while the identical request worked locally.
+  Had Claude Code read the actual Render traceback (not guess from the code) -- a pinned
+  `google-genai==1.3.0` on the server predated the Gemini API's `thought_signature`
+  requirement for multi-turn function calls, while my local environment happened to have a
+  newer unpinned version installed. Fixed by pinning the dependency versions actually
+  verified to work together, not just the first ones that happened to install.
 
 I reviewed the actual diffs and ran the tests/manual checks described in
 `docs/ARCHITECTURE.md` myself rather than accepting generated output unverified -- the
