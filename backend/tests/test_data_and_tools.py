@@ -8,7 +8,7 @@ import pytest
 from app.data_loader import load_workbook_to_sqlite
 from app.documents import DocumentIndex
 from app.session import create_customer_session, create_internal_session
-from app.tools import records, metrics
+from app.tools import records, metrics, actions
 from app.business_hours import add_business_hours, business_hours_elapsed
 from datetime import datetime
 from app.config import IST
@@ -94,3 +94,26 @@ def test_add_business_hours_skips_weekend():
     start = datetime(2026, 8, 14, 17, 30, tzinfo=IST)  # Friday 5:30pm
     deadline = add_business_hours(start, 1)
     assert deadline == datetime(2026, 8, 17, 9, 30, tzinfo=IST)  # rolls to Monday 9:30am
+
+
+# --- action confirmation gate --------------------------------------------
+
+def test_action_requires_confirmation_before_it_is_recorded():
+    staff = create_internal_session("agent", "Rohit")
+    before = len(actions.list_executed_actions())
+    proposal = actions.propose_action(staff, "create_followup_task",
+                                       {"description": "check in with customer"})
+    assert len(actions.list_executed_actions()) == before  # nothing executed yet
+    actions.execute_action(staff, proposal["pending_id"])
+    assert len(actions.list_executed_actions()) == before + 1
+
+
+def test_manager_only_action_blocked_for_agent_role():
+    agent = create_internal_session("agent", "Rohit")
+    manager = create_internal_session("manager", "Priya")
+    proposal = actions.propose_action(agent, "create_escalation",
+                                       {"ticket_id": "TKT-505", "severity": "P1",
+                                        "security_related": True})
+    assert actions.execute_action(agent, proposal["pending_id"]).get("error")
+    result = actions.execute_action(manager, proposal["pending_id"])
+    assert result["status"] == "executed"

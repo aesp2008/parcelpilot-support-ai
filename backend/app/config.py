@@ -22,7 +22,7 @@ BUSINESS_DAY_END_HOUR = 18
 BUSINESS_DAYS = {0, 1, 2, 3, 4}  # Monday=0 ... Sunday=6
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite")
 
 CURRENCY = "INR"
 MANAGER_APPROVAL_THRESHOLD_INR = 1000

@@ -22,6 +22,7 @@ _ACTION_TYPES = {"create_escalation", "update_ticket", "create_followup_task"}
 class PendingAction:
     pending_id: str
     session_id: str
+    session_kind: str
     action_type: str
     payload: dict
     requires_manager: bool
@@ -48,7 +49,7 @@ def propose_action(session: Session, action_type: str, payload: dict) -> dict:
     needs_manager = _requires_manager(action_type, payload)
     pending_id = str(uuid.uuid4())[:8]
     _pending[pending_id] = PendingAction(
-        pending_id=pending_id, session_id=session.session_id,
+        pending_id=pending_id, session_id=session.session_id, session_kind=session.kind,
         action_type=action_type, payload=payload, requires_manager=needs_manager,
     )
     summary = _describe(action_type, payload)
@@ -68,7 +69,13 @@ def execute_action(session: Session, pending_id: str) -> dict:
     if pending is None:
         return {"error": "No such pending action (it may have already been executed or "
                           "never proposed)."}
-    if pending.session_id != session.session_id:
+    # A customer's own pending action can only be confirmed by that same customer session.
+    # Internal staff share one ops queue, so any internal session may confirm an action
+    # another internal session proposed (e.g. an agent proposes, a manager confirms) --
+    # the manager-approval check below still gates who is allowed to actually execute it.
+    same_owner = pending.session_id == session.session_id
+    both_internal = pending.session_kind == "internal" and session.kind == "internal"
+    if not (same_owner or both_internal):
         return {"error": "This pending action belongs to a different session."}
     if pending.requires_manager and not (session.kind == "internal" and session.role == "manager"):
         return {"error": "This action requires manager approval to execute. Current "

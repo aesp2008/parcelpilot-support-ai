@@ -13,7 +13,8 @@ from app.documents import DocumentIndex
 from app.session import Session
 from app.tools import TOOL_SCHEMAS, dispatch_tool
 
-MAX_TOOL_ROUNDS = 6
+MAX_TOOL_ROUNDS = 5
+MAX_OUTPUT_TOKENS = 1024  # keep responses tight -- this project runs on a metered key
 
 SYSTEM_PROMPT = """\
 You are ParcelPilot Support AI, an assistant for a B2B logistics platform. You help either \
@@ -55,6 +56,16 @@ status "executed".
 
 Be concise, cite sources (file name / policy section) when giving a policy-based answer, \
 and say plainly when you don't have enough information rather than guessing.
+
+TOOL-CALL BUDGET: you have a small number of tool calls available per turn, so use them \
+deliberately. Never issue two search_documents calls with similar wording -- if a search \
+already returned relevant passages, use what you have instead of rephrasing and searching \
+again. The document pack is small (six files); if a specific procedure isn't in the first \
+relevant result, it likely doesn't exist as a separate document, and you should reason from \
+the general policy/severity rules you already found rather than continuing to search for it. \
+For anything you can already decide from a P1/P2/P3 definition plus "escalate immediately" \
+language (e.g. any security/credential-exposure report), go straight to propose_action \
+instead of searching further.
 """
 
 
@@ -86,6 +97,7 @@ def run_turn(conn: sqlite3.Connection, doc_index: DocumentIndex, session: Sessio
     config = types.GenerateContentConfig(
         system_instruction=SYSTEM_PROMPT + "\n\n" + _session_context_line(session),
         tools=_to_gemini_tools(),
+        max_output_tokens=MAX_OUTPUT_TOKENS,
     )
 
     trace = []
