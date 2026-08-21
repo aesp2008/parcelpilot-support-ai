@@ -2,7 +2,10 @@ import os
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from dotenv import load_dotenv
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+load_dotenv(BASE_DIR / "backend" / ".env")
 DATA_PACK_DIR = BASE_DIR / "data_pack"
 WORKBOOK_PATH = DATA_PACK_DIR / "ParcelPilot_Assessment_Data.xlsx"
 
