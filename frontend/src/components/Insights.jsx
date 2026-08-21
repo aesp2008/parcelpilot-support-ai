@@ -61,7 +61,7 @@ export default function Insights({ session }) {
         {data.known_issue_clusters.length === 0 && <p>No clustered known-issue tickets right now.</p>}
         {data.known_issue_clusters.map((c) => (
           <div key={c.known_issue} className="row">
-            <strong>{c.known_issue}</strong> — {c.accounts_affected} account(s) affected:{' '}
+            <strong>{c.known_issue}</strong> — {c.accounts_affected} account{c.accounts_affected === 1 ? '' : 's'} affected:{' '}
             {c.tickets.map((t) => `${t.ticket_id} (${t.account_name})`).join(', ')}
           </div>
         ))}
